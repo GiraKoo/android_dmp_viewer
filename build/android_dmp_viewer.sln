@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33627.172
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "android_dmp_viewer", "android_dmp_viewer.vcxproj", "{997E60CC-56E0-4BA4-8D53-200AD2120835}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AFB62048-A0F9-44CB-8604-2864C002CCEE} = {AFB62048-A0F9-44CB-8604-2864C002CCEE}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imgui", "..\imgui\imgui.vcxproj", "{AFB62048-A0F9-44CB-8604-2864C002CCEE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{997E60CC-56E0-4BA4-8D53-200AD2120835}.Debug|x64.ActiveCfg = Debug|x64
+		{997E60CC-56E0-4BA4-8D53-200AD2120835}.Debug|x64.Build.0 = Debug|x64
+		{997E60CC-56E0-4BA4-8D53-200AD2120835}.Release|x64.ActiveCfg = Release|x64
+		{997E60CC-56E0-4BA4-8D53-200AD2120835}.Release|x64.Build.0 = Release|x64
+		{AFB62048-A0F9-44CB-8604-2864C002CCEE}.Debug|x64.ActiveCfg = Debug|x64
+		{AFB62048-A0F9-44CB-8604-2864C002CCEE}.Debug|x64.Build.0 = Debug|x64
+		{AFB62048-A0F9-44CB-8604-2864C002CCEE}.Release|x64.ActiveCfg = Release|x64
+		{AFB62048-A0F9-44CB-8604-2864C002CCEE}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1B60BD4F-20C0-4FD0-92F7-B3B17E6FD78A}
+	EndGlobalSection
+EndGlobal

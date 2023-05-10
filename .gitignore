@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# Compile files
+/build/x64
+/imgui/x64
+
+# IDE files
+.vs/
+.vscode/
