@@ -11,10 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\ImGuiFileDialog\ImGuiFileDialog.cpp" />
     <ClCompile Include="..\src\android_dmp_viewer.cpp" />
     <ClCompile Include="..\src\main_view.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialog.h" />
+    <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialogConfig.h" />
     <ClInclude Include="..\src\common.h" />
     <ClInclude Include="..\src\main_view.h" />
   </ItemGroup>
@@ -52,12 +55,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>../include/;../imgui/;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>../include/;../imgui/;../ImGuiFileDialog/;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)$(Platform)/$(Configuration)/;../lib/;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IntDir>$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>../include/;../imgui/;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>../include/;../imgui/;../ImGuiFileDialog/;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)$(Platform)/$(Configuration)/;../lib/;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IntDir>$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

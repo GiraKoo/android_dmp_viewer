@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include "xini_file.h"
+#include "ImGuiFileDialog.h"
 
 // Our state
 static bool show_demo_window = false;
@@ -48,7 +49,24 @@ void MainView::render()
 
 			if (ImGui::Button("Browse"))
 			{
-				// TODO: Show File Dialog
+				ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".dmp", m_dumpFilePath);
+			}
+
+			// display
+			if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey"))
+			{
+				// action if OK
+				if (ImGuiFileDialog::Instance()->IsOk())
+				{
+					std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+					std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+
+					// action
+					strcpy_s(m_dumpFilePath, ELEMENT_OF(m_dumpFilePath), filePathName.c_str());
+				}
+
+				// close
+				ImGuiFileDialog::Instance()->Close();
 			}
 		}
 
