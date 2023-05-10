@@ -2,7 +2,8 @@
 
 Show stack of android crash dump files with llvm tools.
 
-Author: [GiraKoo]  
+Author: GiraKoo
+
 LISENCE: MIT
 
 ## Structures
@@ -17,6 +18,11 @@ LISENCE: MIT
 - [ ] Specify **symbol file path**.
 - [ ] Output stack. May show content in application.
 - [ ] Convert addresses to function names.
-- [ ] Save **symbol file path** in ini config file.
+- [x] Save **symbol file path** in ini config file.
 - [ ] Load **symbol avaliable files** from web server.
 - [ ] Download crash files from Android Device via ADB.
+
+## Thanks
+
+- **Dear Imgui** from [ocornut/imgui](https://github.com/ocornut/imgui)
+- **ImGuiFileDialog** from [aiekick/ImGuiFileDialog](https://github.com/aiekick/ImGuiFileDialog)
