@@ -18,5 +18,13 @@
     <ClCompile Include="android_dmp_viewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="main_view.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="main_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
