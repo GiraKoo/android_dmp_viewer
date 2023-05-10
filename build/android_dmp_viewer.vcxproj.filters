@@ -15,21 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="android_dmp_viewer.cpp">
+    <ClCompile Include="..\src\android_dmp_viewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main_view.cpp">
+    <ClCompile Include="..\src\main_view.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="main_view.h">
+    <ClInclude Include="..\src\common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="xini_file.h">
+    <ClInclude Include="..\src\main_view.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
