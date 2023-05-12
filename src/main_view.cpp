@@ -42,39 +42,27 @@ void MainView::render()
 		//ImGui::Checkbox("Another Window", &show_another_window);
 
 		{
-			ImGui::PushItemWidth(300);
+			ImGui::PushItemWidth(600);
 			ImGui::InputText("Dump file", m_dumpFilePath, ELEMENT_OF(m_dumpFilePath));
 			ImGui::PopItemWidth();
 			ImGui::SameLine();
 
-			if (ImGui::Button("Browse"))
+			if (ImGui::Button("Browse##DumpFile"))
 			{
-				ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".dmp", m_dumpFilePath);
-			}
-
-			// display
-			if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey"))
-			{
-				// action if OK
-				if (ImGuiFileDialog::Instance()->IsOk())
-				{
-					std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-					std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-
-					// action
-					strcpy_s(m_dumpFilePath, ELEMENT_OF(m_dumpFilePath), filePathName.c_str());
-				}
-
-				// close
-				ImGuiFileDialog::Instance()->Close();
+				ImGuiFileDialog::Instance()->OpenDialog("ChooseDmpFile", "Choose Dmp File", ".dmp", m_dumpFilePath);
 			}
 		}
 
 		{
-			ImGui::PushItemWidth(300);
+			ImGui::PushItemWidth(600);
 			ImGui::InputText("Symbol file", m_symbolFilePath, ELEMENT_OF(m_symbolFilePath));
 			ImGui::PopItemWidth();
 			ImGui::SameLine();
+
+			if (ImGui::Button("Browse##SymbolFile"))
+			{
+				ImGuiFileDialog::Instance()->OpenDialog("ChooseSymbolFile", "Choose Symbol File", ".so", m_symbolFilePath);
+			}
 
 			if (ImGui::Button("Local History"))
 			{
@@ -88,7 +76,7 @@ void MainView::render()
 		}
 
 		{
-			ImGui::PushItemWidth(300);
+			ImGui::PushItemWidth(600);
 			ImGui::InputText("StackWalk tool", m_stackWalkToolPath, ELEMENT_OF(m_stackWalkToolPath));
 			ImGui::PopItemWidth();
 			ImGui::SameLine();
@@ -98,7 +86,7 @@ void MainView::render()
 		}
 
 		{
-			ImGui::PushItemWidth(300);
+			ImGui::PushItemWidth(600);
 			ImGui::InputText("Symbolizer tool", m_symbolizerToolPath, ELEMENT_OF(m_symbolizerToolPath));
 			ImGui::PopItemWidth();
 			ImGui::SameLine();
@@ -107,7 +95,7 @@ void MainView::render()
 			}
 		}
 		{
-			ImGui::PushItemWidth(300);
+			ImGui::PushItemWidth(600);
 			ImGui::InputText("Public symbol server", m_publicSymbolServer, ELEMENT_OF(m_publicSymbolServer));
 			ImGui::PopItemWidth();
 			ImGui::SameLine();
@@ -116,7 +104,7 @@ void MainView::render()
 			}
 		}
 		{
-			ImGui::PushItemWidth(300);
+			ImGui::PushItemWidth(600);
 			ImGui::InputText("Android crash directory", m_androidCrashDirectoryPath, ELEMENT_OF(m_androidCrashDirectoryPath));
 			ImGui::PopItemWidth();
 			ImGui::SameLine();
@@ -147,6 +135,49 @@ void MainView::render()
 		}
 
 		ImGui::End();
+	}
+
+	// display
+	if (ImGuiFileDialog::Instance()->Display("ChooseDmpFile"))
+	{
+		// action if OK
+		if (ImGuiFileDialog::Instance()->IsOk())
+		{
+			std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+			std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+
+			// action
+			strcpy_s(m_dumpFilePath, ELEMENT_OF(m_dumpFilePath), filePathName.c_str());
+		}
+
+		// close
+		ImGuiFileDialog::Instance()->Close();
+	}
+	if (ImGuiFileDialog::Instance()->Display("ChooseDmpFile"))
+	{
+		// action if OK
+		if (ImGuiFileDialog::Instance()->IsOk())
+		{
+			std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+			strcpy_s(m_dumpFilePath, ELEMENT_OF(m_dumpFilePath), filePathName.c_str());
+		}
+
+		// close
+		ImGuiFileDialog::Instance()->Close();
+	}
+	if (ImGuiFileDialog::Instance()->Display("ChooseSymbolFile"))
+	{
+		// action if OK
+		if (ImGuiFileDialog::Instance()->IsOk())
+		{
+			std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+
+			// action
+			strcpy_s(m_symbolFilePath, ELEMENT_OF(m_symbolFilePath), filePathName.c_str());
+		}
+
+		// close
+		ImGuiFileDialog::Instance()->Close();
 	}
 
 	// 3. Show another simple window.

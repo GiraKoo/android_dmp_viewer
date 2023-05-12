@@ -15,17 +15,13 @@
 //   vcpkg integrate install                        ; register include and libs in Visual Studio
 
 #include "imgui.h"
-#include "backends/imgui_impl_glut.h"
+#include "backends/imgui_impl_win32.h"
 #include "backends/imgui_impl_opengl2.h"
+#include <windows.h>
+#include <GL/GL.h>
 
 #pragma comment(lib, "imgui.lib")
-
-#define GL_SILENCE_DEPRECATION
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/freeglut.h>
-#endif
+#pragma comment(lib, "opengl32.lib")
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4505) // unreferenced local function has been removed
@@ -33,24 +29,26 @@
 
 #include "main_view.h"
 
-// Forward declarations of helper functions
+static HDC		gHDC = NULL;
+static HGLRC	gHRC = NULL;
+static int		gWindowWidth = 300;
+static int		gWindowHeight = 300;
+
+LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+BOOL bSetupPixelFormat(HDC hdc);
 void MainLoopStep();
 
 int main(int argc, char** argv)
 {
-	// Create GLUT window
-	glutInit(&argc, argv);
-#ifdef __FREEGLUT_EXT_H__
-	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
-#endif
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_MULTISAMPLE);
-	glutInitWindowSize(1280, 720);
-	glutCreateWindow("Dear ImGui GLUT+OpenGL2 Example");
+	// Create application window
+	//ImGui_ImplWin32_EnableDpiAwareness();
+	WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
+	::RegisterClassExW(&wc);
+	HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX12 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
 
-	// Setup GLUT display function
-	// We will also call ImGui_ImplGLUT_InstallFuncs() to get all the other functions installed for us,
-	// otherwise it is possible to install our own functions and call the imgui_impl_glut.h functions ourselves.
-	glutDisplayFunc(MainLoopStep);
+	// Show the window
+	::ShowWindow(hwnd, SW_SHOWDEFAULT);
+	::UpdateWindow(hwnd);
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -64,15 +62,8 @@ int main(int argc, char** argv)
 
 	// Setup Platform/Renderer backends
 	// FIXME: Consider reworking this example to install our own GLUT funcs + forward calls ImGui_ImplGLUT_XXX ones, instead of using ImGui_ImplGLUT_InstallFuncs().
-	ImGui_ImplGLUT_Init();
+	ImGui_ImplWin32_Init(hwnd);
 	ImGui_ImplOpenGL2_Init();
-
-	// Install GLUT handlers (glutReshapeFunc(), glutMotionFunc(), glutPassiveMotionFunc(), glutMouseFunc(), glutKeyboardFunc() etc.)
-	// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-	// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-	// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-	// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-	ImGui_ImplGLUT_InstallFuncs();
 
 
 	// Load Fonts
@@ -94,12 +85,35 @@ int main(int argc, char** argv)
 	MainView::init();
 
 	// Main loop
-	glutMainLoop();
+	bool done = false;
+	while (!done)
+	{
+		// Poll and handle messages (inputs, window resize, etc.)
+		// See the WndProc() function below for our to dispatch events to the Win32 backend.
+		MSG msg;
+		while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
+		{
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+			if (msg.message == WM_QUIT)
+				done = true;
+		}
+		if (done)
+			break;
+
+		// Main loop
+		MainLoopStep();
+
+		SwapBuffers(gHDC);
+	}
 
 	// Cleanup
 	ImGui_ImplOpenGL2_Shutdown();
-	ImGui_ImplGLUT_Shutdown();
+	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
+	::DestroyWindow(hwnd);
+	::UnregisterClassW(wc.lpszClassName, wc.hInstance);
 
 	return 0;
 }
@@ -108,9 +122,12 @@ void MainLoopStep()
 {
 	ImGuiIO& io = ImGui::GetIO();
 
+	io.DisplaySize = ImVec2((float)gWindowWidth, (float)gWindowHeight);
+
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL2_NewFrame();
-	ImGui_ImplGLUT_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
 
 	MainView::render();
 
@@ -121,9 +138,105 @@ void MainLoopStep()
 	glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
 
 	glClear(GL_COLOR_BUFFER_BIT);
+
 	//glUseProgram(0); // You may want this if using this code in an OpenGL 3+ context where shaders may be bound, but prefer using the GL3+ code.
 	ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+}
 
-	glutSwapBuffers();
-	glutPostRedisplay();
+
+// Forward declare message handler from imgui_impl_win32.cpp
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+// Win32 message handler
+// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+		return true;
+
+	PAINTSTRUCT    ps;
+
+	switch (msg)
+	{
+	case WM_CREATE:
+		gHDC = GetDC(hWnd);
+		if (!bSetupPixelFormat(gHDC))
+			PostQuitMessage(0);
+
+		gHRC = wglCreateContext(gHDC);
+		wglMakeCurrent(gHDC, gHRC);
+		break;
+	case WM_DESTROY:
+		if (gHRC)
+		{
+			wglDeleteContext(gHRC);
+			gHDC = NULL;
+		}
+		if (gHDC)
+		{
+			ReleaseDC(hWnd, gHDC);
+			gHDC = NULL;
+		}
+		PostQuitMessage(0);
+		break;
+	case WM_PAINT:
+		BeginPaint(hWnd, &ps);
+		EndPaint(hWnd, &ps);
+		break;
+	case WM_SIZE:
+	{
+		// Notify OpenGL
+		RECT rect;
+		GetClientRect(hWnd, &rect);
+
+		gWindowWidth = rect.right - rect.left;
+		gWindowHeight = rect.bottom - rect.top;
+
+		break;
+	}
+	case WM_SYSCOMMAND:
+		if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+			return 0;
+		break;
+
+	}
+	return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+}
+
+BOOL bSetupPixelFormat(HDC hdc)
+{
+	PIXELFORMATDESCRIPTOR pfd, * ppfd;
+	int pixelformat;
+
+	ppfd = &pfd;
+
+	ppfd->nSize = sizeof(PIXELFORMATDESCRIPTOR);
+	ppfd->nVersion = 1;
+	ppfd->dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL |
+		PFD_DOUBLEBUFFER;
+	ppfd->dwLayerMask = PFD_MAIN_PLANE;
+	ppfd->iPixelType = PFD_TYPE_COLORINDEX;
+	ppfd->cColorBits = 8;
+	ppfd->cDepthBits = 16;
+	ppfd->cAccumBits = 0;
+	ppfd->cStencilBits = 0;
+
+	pixelformat = ChoosePixelFormat(hdc, ppfd);
+
+	if ((pixelformat = ChoosePixelFormat(hdc, ppfd)) == 0)
+	{
+		MessageBox(NULL, L"ChoosePixelFormat failed", L"Error", MB_OK);
+		return FALSE;
+	}
+
+	if (SetPixelFormat(hdc, pixelformat, ppfd) == FALSE)
+	{
+		MessageBox(NULL, L"SetPixelFormat failed", L"Error", MB_OK);
+		return FALSE;
+	}
+
+	return TRUE;
 }
