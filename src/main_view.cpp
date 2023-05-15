@@ -4,12 +4,14 @@
 #include <windows.h>
 #include "xini_file.h"
 #include "ImGuiFileDialog.h"
+#include "file_system_helper.h"
+#include "stack_reader.h"
 
 // Our state
 static bool show_demo_window = false;
 static bool show_another_window = false;
 
-char MainView::m_dumpFilePath[MAX_FILE_PATH_LENGTH] = { 0 };
+char MainView::m_dmpFilePath[MAX_FILE_PATH_LENGTH] = { 0 };
 char MainView::m_symbolFilePath[MAX_FILE_PATH_LENGTH] = { 0 };
 char MainView::m_stackWalkToolPath[MAX_FILE_PATH_LENGTH] = { 0 };
 char MainView::m_symbolizerToolPath[MAX_FILE_PATH_LENGTH] = { 0 };
@@ -43,13 +45,21 @@ void MainView::render()
 
 		{
 			ImGui::PushItemWidth(600);
-			ImGui::InputText("Dump file", m_dumpFilePath, ELEMENT_OF(m_dumpFilePath));
+			ImGui::InputText("Dmp file", m_dmpFilePath, ELEMENT_OF(m_dmpFilePath));
 			ImGui::PopItemWidth();
 			ImGui::SameLine();
 
-			if (ImGui::Button("Browse##DumpFile"))
+			if (ImGui::Button("Browse##DmpFile"))
 			{
-				ImGuiFileDialog::Instance()->OpenDialog("ChooseDmpFile", "Choose Dmp File", ".dmp", m_dumpFilePath);
+				//ImGuiFileDialog::Instance()->OpenDialog("ChooseDmpFile", "Choose Dmp File", ".dmp", m_dumpFilePath);
+				std::string selectedPath = "";
+				std::string initialDir = m_dmpFilePath;
+				initialDir.erase(initialDir.find_last_of(L'\\'));
+				if (FileSystemHelper::getInstance()->select("Choose Dmp File", "*.dmp\0\0", initialDir, selectedPath))
+				{
+					strcpy_s(m_dmpFilePath, ELEMENT_OF(m_dmpFilePath), selectedPath.c_str());
+					writeConfig();
+				}
 			}
 		}
 
@@ -61,9 +71,17 @@ void MainView::render()
 
 			if (ImGui::Button("Browse##SymbolFile"))
 			{
-				ImGuiFileDialog::Instance()->OpenDialog("ChooseSymbolFile", "Choose Symbol File", ".so", m_symbolFilePath);
+				std::string selectedPath = "";
+				std::string initialDir = m_symbolFilePath;
+				initialDir.erase(initialDir.find_last_of(L'\\'));
+				if (FileSystemHelper::getInstance()->select("Choose Dmp File", "*.so\0\0", initialDir, selectedPath))
+				{
+					strcpy_s(m_symbolFilePath, ELEMENT_OF(m_symbolFilePath), selectedPath.c_str());
+					writeConfig();
+				}
 			}
 
+			ImGui::SameLine();
 			if (ImGui::Button("Local History"))
 			{
 				// TODO: Show Local History
@@ -117,7 +135,7 @@ void MainView::render()
 
 		if (ImGui::Button("Reset"))
 		{
-			strcpy_s(m_dumpFilePath, ELEMENT_OF(m_dumpFilePath), "");
+			strcpy_s(m_dmpFilePath, ELEMENT_OF(m_dmpFilePath), "");
 			strcpy_s(m_symbolFilePath, ELEMENT_OF(m_symbolFilePath), "");
 			strcpy_s(m_stackWalkToolPath, ELEMENT_OF(m_stackWalkToolPath), "minidump_stackwalk.exe");
 			strcpy_s(m_symbolizerToolPath, ELEMENT_OF(m_symbolizerToolPath), "llvm-symbolizer.exe");
@@ -131,7 +149,14 @@ void MainView::render()
 
 		if (ImGui::Button("Go"))
 		{
-			writeConfig();
+			StackReader* reader = StackReader::getInstance();
+			reader->setStackWalkToolPath(m_stackWalkToolPath);
+			reader->setSymbolizerToolPath(m_symbolizerToolPath);
+
+			reader->clearLibPath();
+			reader->addLibPath(m_symbolFilePath);
+
+			reader->loadDumpFilePath(m_dmpFilePath);
 		}
 
 		ImGui::End();
@@ -147,7 +172,7 @@ void MainView::render()
 			std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
 
 			// action
-			strcpy_s(m_dumpFilePath, ELEMENT_OF(m_dumpFilePath), filePathName.c_str());
+			strcpy_s(m_dmpFilePath, ELEMENT_OF(m_dmpFilePath), filePathName.c_str());
 		}
 
 		// close
@@ -159,7 +184,7 @@ void MainView::render()
 		if (ImGuiFileDialog::Instance()->IsOk())
 		{
 			std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-			strcpy_s(m_dumpFilePath, ELEMENT_OF(m_dumpFilePath), filePathName.c_str());
+			strcpy_s(m_dmpFilePath, ELEMENT_OF(m_dmpFilePath), filePathName.c_str());
 		}
 
 		// close
@@ -193,9 +218,9 @@ void MainView::render()
 
 void MainView::readConfig()
 {
-	xini_file_t iniFile("app.ini");
+	xini_file_t iniFile(FileSystemHelper::getInstance()->getApplicationDirectory() + "\\app.ini");
 
-	strcpy_s(m_dumpFilePath, ELEMENT_OF(m_dumpFilePath), iniFile["DEFAULT"]["dump_file_path"]);
+	strcpy_s(m_dmpFilePath, ELEMENT_OF(m_dmpFilePath), iniFile["DEFAULT"]["dump_file_path"]);
 	strcpy_s(m_symbolFilePath, ELEMENT_OF(m_symbolFilePath), iniFile["DEFAULT"]["symbol_file_path"]);
 	strcpy_s(m_stackWalkToolPath, ELEMENT_OF(m_stackWalkToolPath), iniFile["DEFAULT"]["stack_walk_tool_path"]("minidump_stackwalk.exe"));
 	strcpy_s(m_symbolizerToolPath, ELEMENT_OF(m_symbolizerToolPath), iniFile["DEFAULT"]["symbolizer_tool_path"]("llvm-symbolizer.exe"));
@@ -205,8 +230,9 @@ void MainView::readConfig()
 
 void MainView::writeConfig()
 {
-	xini_file_t iniFile("app.ini");
-	iniFile["DEFAULT"]["dump_file_path"] = m_dumpFilePath;
+	// 获得当前程序所在目录
+	xini_file_t iniFile(FileSystemHelper::getInstance()->getApplicationDirectory() + "\\app.ini");
+	iniFile["DEFAULT"]["dump_file_path"] = m_dmpFilePath;
 	iniFile["DEFAULT"]["symbol_file_path"] = m_symbolFilePath;
 	iniFile["DEFAULT"]["stack_walk_tool_path"] = m_stackWalkToolPath;
 	iniFile["DEFAULT"]["symbolizer_tool_path"] = m_symbolizerToolPath;

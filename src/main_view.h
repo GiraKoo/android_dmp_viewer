@@ -24,7 +24,7 @@ public:
 
 private:
 	// 待解析文件路径
-	static char m_dumpFilePath[MAX_FILE_PATH_LENGTH];
+	static char m_dmpFilePath[MAX_FILE_PATH_LENGTH];
 
 	static char m_symbolFilePath[MAX_FILE_PATH_LENGTH];
 

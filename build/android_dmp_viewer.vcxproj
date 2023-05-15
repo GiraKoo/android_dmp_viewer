@@ -13,13 +13,17 @@
   <ItemGroup>
     <ClCompile Include="..\ImGuiFileDialog\ImGuiFileDialog.cpp" />
     <ClCompile Include="..\src\android_dmp_viewer.cpp" />
+    <ClCompile Include="..\src\file_system_helper.cpp" />
     <ClCompile Include="..\src\main_view.cpp" />
+    <ClCompile Include="..\src\stack_reader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialog.h" />
     <ClInclude Include="..\ImGuiFileDialog\ImGuiFileDialogConfig.h" />
     <ClInclude Include="..\src\common.h" />
+    <ClInclude Include="..\src\file_system_helper.h" />
     <ClInclude Include="..\src\main_view.h" />
+    <ClInclude Include="..\src\stack_reader.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
